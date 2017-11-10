@@ -1,0 +1,29 @@
+---
+spring:
+  cloud:
+    config:
+      enabled: false
+
+# Don't write access log
+server:
+  tomcat:
+    basedir:
+    accesslog:
+      enabled: false
+
+# Don't write logs to file  & set api log level
+logging:
+  path:
+  level:
+    com.esure.api: debug
+
+ipt:
+  url:  http://localhost:8080/ipt
+
+postcode:
+  url:  http://localhost:8080/postcode
+
+ref-data:
+  url:  http://localhost:8080/refdata
+
+

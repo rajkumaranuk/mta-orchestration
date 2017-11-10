@@ -1,0 +1,65 @@
+# Sudo is required to run Docker
+sudo: required
+
+# Let Travis know this is a Java project.
+# Travis will run the maven commands to retrieve dependencies and build your artefact.
+language: java
+
+# Build with Open JDK 8 to ensure consistency with Docker image
+jdk:
+  - openjdk8
+
+# We need Docker to build our Docker image
+services:
+    - docker
+
+# Set up a cache for Maven dependencies.
+# Should speed up builds.
+cache:
+  directories:
+    - $HOME/.m2/repository
+
+# Copy over our settings.xml so the build can resolve dependencies
+# Install AWS CLIs
+before_install:
+  - cp mvn.settings.xml $HOME/.m2/settings.xml
+  - pip install --user awscli
+  # Get AWS credentials
+  - eval $(aws ecr get-login --region eu-west-1)
+  # Get the maven version number
+  - export VERSION=`mvn help:evaluate -Dexpression=project.version | grep -Ev '(^\[|Download\w+:)'`
+  # Set Beanstalk app version to Maven version and build number if SNAPSHOT and just Maven version if not SNAPSHOT
+  - if [[ $VERSION =~ SNAPSHOT ]]; then export ELASTIC_BEANSTALK_LABEL=$VERSION-$TRAVIS_BUILD_NUMBER; else export ELASTIC_BEANSTALK_LABEL=$VERSION; fi
+
+after_success:
+  # Build the docker image
+  - docker build -t 829070902612.dkr.ecr.eu-west-1.amazonaws.com/api-jva-home-pricing-orchestration:$VERSION .
+  # Put version into Dockerrun so that the correct Docker image version is deployed onto Beanstalk
+  - sed -i "s/{{VERSION}}/$VERSION/g" Dockerrun.aws.json
+
+deploy:
+  # Deploy artefact to repository if on master branch
+  - provider:     script
+    script:       mvn deploy -B -Dmaven.test.skip
+    skip_cleanup: true
+    on:
+      branch:     master
+
+  # Deploy docker image to repository if on master branch
+  - provider:     script
+    script:       docker push 829070902612.dkr.ecr.eu-west-1.amazonaws.com/api-jva-home-pricing-orchestration:$VERSION
+    skip_cleanup: true
+    on:
+      branch:     master
+
+  # Auto deploy un-tagged master commits to devh
+  - provider:                elasticbeanstalk
+    on:
+      branch:                master
+      condition:             -z $TRAVIS_TAG
+    app:                     "api-jva-home-pricing-orchestration"
+    bucket_path:             "api-jva-home-pricing-orchestration"
+    skip_cleanup:            true
+    bucket_name:             "elasticbeanstalk-eu-west-1-829070902612"
+    env:                     api-jva-home-pricing-orchestration-devc
+    region:                  eu-west-1

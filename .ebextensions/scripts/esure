@@ -1,0 +1,31 @@
+#!/bin/sh
+# chkconfig: 123456 99 01
+# description: Esure termination handler
+
+. /etc/init.d/functions
+
+start() {
+    echo -n "Starting esure services.. "
+    touch /var/lock/subsys/esure
+    # nothing else to do here..
+    echo
+    return 0
+}
+
+stop() {
+    echo -n "Stopping esure services.. "
+    rm -f /var/lock/subsys/esure
+    cd /root/dns
+    ./update_R53 DELETE # clears my fwd entry in Route53
+    RETVAL=$?
+    echo
+    return $RETVAL
+}
+
+case "$1" in
+    start) start;;
+    stop) stop;;
+     *)   echo "Usage: $0 start|stop"
+          exit 2
+esac
+exit $?

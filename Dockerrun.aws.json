@@ -1,0 +1,59 @@
+{
+  "AWSEBDockerrunVersion": 2,
+  "volumes": [
+    {
+      "name": "App",
+      "host": {
+        "sourcePath": "/var/app/current"
+      }
+    },
+    {
+      "name": "Beanstalk",
+      "host": {
+        "sourcePath": "/opt/elasticbeanstalk"
+      }
+    },
+    {
+      "name": "Health",
+      "host": {
+        "sourcePath": "/var/log/nginx/healthd"
+      }
+    }
+  ],
+  "containerDefinitions": [
+    {
+      "name": "api-jva-home-pricing-orchestration",
+      "image": "829070902612.dkr.ecr.eu-west-1.amazonaws.com/api-jva-home-pricing-orchestration:{{VERSION}}",
+      "essential": true,
+      "memory": 256,
+      "mountPoints": [
+        {
+          "sourceVolume": "App",
+          "containerPath": "/App"
+        },
+        {
+          "sourceVolume": "Beanstalk",
+          "containerPath": "/opt/elasticbeanstalk"
+        },
+        {
+          "sourceVolume": "Health",
+          "containerPath": "/var/log/nginx/healthd"
+        }
+      ],
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 9280
+        },
+        {
+          "hostPort": 81,
+          "containerPort": 9281
+        },
+        {
+          "hostPort": 5672,
+          "containerPort": 5672
+        }
+      ]
+    } 
+  ]
+}

@@ -1,0 +1,84 @@
+spring:
+  application:
+    name: mta-orchestration
+  cloud:
+    config:
+       uri: http://apimotorconfigservice-deva.eu-west-1.elasticbeanstalk.com
+  profiles:
+    active:
+    - ${ENV:local}
+  main:
+    banner-mode: 'off'
+  http:
+    multipart:
+       max-file-size: 1Mb
+       max-request-size: 10Mb
+  boot:
+    admin:
+      client:
+        enabled: false
+
+server:
+  port: 9280
+  context-path: /mta-orchestration-api/v1
+  tomcat:
+    basedir: /var/log/nginx
+    accesslog:
+      enabled: true
+      buffered: false
+      directory: healthd
+      prefix: application.log
+      suffix: null
+      file-date-format: .yyyy-MM-dd-HH
+      pattern: '%{sec}t.%{msec_frac}t"%U"%s"%T"%T"%{x-forwarded-for}i'
+
+management:
+  port: 9281
+  security:
+    enabled: false
+
+camel:
+  rest:
+    api-context-path: /mta-orchestration-api
+    component: servlet
+    binding-mode: json
+  springboot:
+    name: home-pricing-orchestration
+
+logging:
+  path: /var/log
+  level:
+    root: info
+    com.esure.api: debug
+
+rabbitmq:
+  hostname: localhost
+  port: 5672
+  camel-endpoint-template: 'rabbitmq://{0}:{1}/{2}?queue={3}&routingKey={4}&requestTimeout=1000000&transferException=true'
+  welcome-rabbit-endpoint:
+    exchange-name: MTAExchange
+    queue-name: WelcomeQueue
+    routing-key: WelcomeKey
+  ipt-rabbit-endpoint:
+    exchange-name: MTAExchange
+    queue-name: IPTQueue
+    routing-key: IPTKey
+  postcode-rabbit-endpoint:
+    exchange-name: MTAExchange
+    queue-name: PostcodeQueue
+    routing-key: PostcodeKey
+  ref-data-rabbit-endpoint:
+    exchange-name: MTAExchange
+    queue-name: RefDataQueue
+    routing-key: RefDataKey
+
+ipt:
+  url:  http://localhost:8080/ipt
+
+postcode:
+  url:  http://localhost:8080/postcode
+
+ref-data:
+  url:  http://localhost:8080/refdata
+
+
