@@ -30,8 +30,7 @@ you will get the response
 
 The Routing Strategy
 ====================
-                                          IPT Rest call   \
-                                        /
-Request from postman --> Rest endpoint    (multicast)  ---->Aggregated Result ---> Ref Data Rest Call ---> Response to postman
-                                        \
-                                          Postcode Rest call/
+
+
+Request from postman --> Rest endpoint  --->  (multicast to IPT and Postcode rest services) ---->Aggregated Result ---> Ref Data Rest Call ---> Response to postman
+
