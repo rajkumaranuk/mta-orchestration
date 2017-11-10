@@ -32,5 +32,5 @@ The Routing Strategy
 ====================
 
 
-Request from postman --> Rest endpoint  --->  (multicast to IPT and Postcode rest services) ---->Aggregated Result ---> Ref Data Rest Call ---> Response to postman
+Request from postman --> Rest endpoint  --->  (parallel multicast to IPT and Postcode rest services) ---->Aggregated Result ---> Ref Data Rest Call ---> Response to postman
 
